@@ -11,7 +11,7 @@
     "copy-contract-keys": "mkdir -p ./public/midnight/idshield/keys && mkdir -p ./public/midnight/idshield/zkir && cp -r ../idshield-contract/dist/managed/idshield/keys/* ./public/midnight/idshield/keys && cp -r ../idshield-contract/dist/managed/idshield/zkir/* ./public/midnight/idshield/zkir"
   },
   "dependencies": {
-    "@meshsdk/counter-contract": "*",
+    "@meshsdk/idshield-contract": "*",
     "@meshsdk/midnight-core": "^0.0.6",
     "@meshsdk/midnight-react": "^0.0.6",
     "@radix-ui/react-dialog": "^1.1.14",

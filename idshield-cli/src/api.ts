@@ -1,17 +1,18 @@
-import { type ContractAddress } from '@midnight-ntwrk/compact-runtime';
-import { Counter, type CounterPrivateState, witnesses } from '@meshsdk/counter-contract';
+// import { type ContractAddress } from '@midnight-ntwrk/compact-runtime';
+// import { , type CounterPrivateState, witnesses } from '@meshsdk/idshield-contract';
 import { type CoinInfo, nativeToken, Transaction, type TransactionId } from '@midnight-ntwrk/ledger';
-import { deployContract, findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
+import { deployContract /* findDeployedContract */ } from '@midnight-ntwrk/midnight-js-contracts';
 import { httpClientProofProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
 import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
 import { NodeZkConfigProvider } from '@midnight-ntwrk/midnight-js-node-zk-config-provider';
 import {
   type BalancedTransaction,
   createBalancedTx,
-  type FinalizedTxData,
+  // type FinalizedTxData,
   type MidnightProvider,
   type UnbalancedTransaction,
   type WalletProvider,
+  // Witnesses,
 } from '@midnight-ntwrk/midnight-js-types';
 import { type Resource, WalletBuilder } from '@midnight-ntwrk/wallet';
 import { type Wallet } from '@midnight-ntwrk/wallet-api';
@@ -21,17 +22,21 @@ import { type Logger } from 'pino';
 import * as Rx from 'rxjs';
 import { WebSocket } from 'ws';
 import {
-  type CounterContract,
-  type CounterPrivateStateId,
-  type CounterProviders,
-  type DeployedCounterContract,
+  // type IdShieldContract,
+  // type IdShieldPrivateStateId,
+  type IdShieldProviders,
+  type DeployedIdShieldContract,
+  IdShieldContract,
+  IdShieldPrivateStateId,
 } from './common-types';
 import { type Config, contractConfig } from './config';
 import { levelPrivateStateProvider } from '@midnight-ntwrk/midnight-js-level-private-state-provider';
-import { assertIsContractAddress, toHex } from '@midnight-ntwrk/midnight-js-utils';
+import { /* assertIsContractAddress, */ toHex } from '@midnight-ntwrk/midnight-js-utils';
 import { getLedgerNetworkId, getZswapNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 import * as fsAsync from 'node:fs/promises';
 import * as fs from 'node:fs';
+import { IdShield /* IdShieldPrivateState, witnesses */, IdShieldPrivateState } from '@meshsdk/idshield-contract';
+// import { WitnessContext } from '@midnight-ntwrk/compact-runtime';
 
 let logger: Logger;
 // Instead of setting globalThis.crypto which is read-only, we'll ensure crypto is available
@@ -39,114 +44,123 @@ let logger: Logger;
 // @ts-expect-error: It's needed to enable WebSocket usage through apollo
 globalThis.WebSocket = WebSocket;
 
-export const getCounterLedgerState = async (
-  providers: CounterProviders,
-  contractAddress: ContractAddress,
-): Promise<bigint | null> => {
-  assertIsContractAddress(contractAddress);
-  logger.info('Checking contract ledger state...');
-  const state = await providers.publicDataProvider
-    .queryContractState(contractAddress)
-    .then((contractState) => (contractState != null ? Counter.ledger(contractState.data).round : null));
-  logger.info(`Ledger state: ${state}`);
-  return state;
+// export const getCounterLedgerState = async (
+//   providers: IdShieldProviders,
+//   contractAddress: ContractAddress,
+// ): Promise<bigint | null> => {
+//   assertIsContractAddress(contractAddress);
+//   logger.info('Checking contract ledger state...');
+//   const state = await providers.publicDataProvider
+//     .queryContractState(contractAddress)
+//     .then((contractState) => (contractState != null ? IdShield.ledger(contractState.data) : null));
+//   logger.info(`Ledger state: ${state}`);
+//   return state;
+// };
+
+// export const counterContractInstance: CounterContract = new Counter.Contract(witnesses);
+// Ensure witnesses is correctly typed as Witnesses<IdShieldPrivateState>
+const witnesess1: IdShield.Witnesses<IdShieldPrivateState> = {
+  secretKey: function () // context: WitnessContext<IdShield.Ledger, IdShieldPrivateState>,
+  : [IdShieldPrivateState, Uint8Array<ArrayBufferLike>] {
+    throw new Error('Function not implemented.');
+  },
+  getUserBloodType: function () // context: WitnessContext<IdShield.Ledger, IdShieldPrivateState>,
+  : [IdShieldPrivateState, number] {
+    throw new Error('Function not implemented.');
+  },
 };
+export const idShieldContractInstance: IdShieldContract = new IdShield.Contract(witnesess1);
 
-export const counterContractInstance: CounterContract = new Counter.Contract(witnesses);
+// export const joinContract = async (
+//   providers: IdShieldProviders,
+//   contractAddress: string,
+// ): Promise<DeployedIdShieldContract> => {
+//   const counterContract = await findDeployedContract(providers, {
+//     contractAddress,
+//     contract: idShieldContractInstance,
+//     privateStateId: 'counterPrivateState',
+//     initialPrivateState: { privateCounter: 0 },
+//   });
+//   logger.info(`Joined contract at address: ${counterContract.deployTxData.public.contractAddress}`);
+//   return counterContract;
+// };
 
-export const joinContract = async (
-  providers: CounterProviders,
-  contractAddress: string,
-): Promise<DeployedCounterContract> => {
-  const counterContract = await findDeployedContract(providers, {
-    contractAddress,
-    contract: counterContractInstance,
-    privateStateId: 'counterPrivateState',
-    initialPrivateState: { privateCounter: 0 },
-  });
-  logger.info(`Joined contract at address: ${counterContract.deployTxData.public.contractAddress}`);
-  return counterContract;
-};
-
-export const deploy = async (
-  providers: CounterProviders,
-  privateState: CounterPrivateState,
-): Promise<DeployedCounterContract> => {
+export const deploy = async (providers: IdShieldProviders): Promise<DeployedIdShieldContract> => {
   logger.info('Deploying counter contract...');
   const counterContract = await deployContract(providers, {
-    contract: counterContractInstance,
-    privateStateId: 'counterPrivateState',
-    initialPrivateState: privateState,
+    contract: idShieldContractInstance,
+    privateStateId: 'idShieldPrivateState',
+    initialPrivateState: {}, // Provide the correct initial private state structure if needed
   });
   logger.info(`Deployed contract at address: ${counterContract.deployTxData.public.contractAddress}`);
   return counterContract;
 };
 
-export const increment = async (counterContract: DeployedCounterContract): Promise<FinalizedTxData> => {
-  logger.info('Incrementing...');
-  const finalizedTxData = await counterContract.callTx.increment();
-  logger.info({
-    section: 'General Section',
-    tx: finalizedTxData.public.tx,
-    txHash: finalizedTxData.public.txHash,
-    txId: finalizedTxData.public.txId,
-    blockHeight: finalizedTxData.public.blockHeight,
-    blockHash: finalizedTxData.public.blockHash,
-    nextContractState: finalizedTxData.public.nextContractState,
-    publicTranscript: finalizedTxData.public.publicTranscript,
-    status: finalizedTxData.public.status,
-  });
+// export const increment = async (counterContract: DeployedIdShieldContract): Promise<FinalizedTxData> => {
+//   logger.info('Incrementing...');
+//   const finalizedTxData = await counterContract.callTx.increment();
+//   logger.info({
+//     section: 'General Section',
+//     tx: finalizedTxData.public.tx,
+//     txHash: finalizedTxData.public.txHash,
+//     txId: finalizedTxData.public.txId,
+//     blockHeight: finalizedTxData.public.blockHeight,
+//     blockHash: finalizedTxData.public.blockHash,
+//     nextContractState: finalizedTxData.public.nextContractState,
+//     publicTranscript: finalizedTxData.public.publicTranscript,
+//     status: finalizedTxData.public.status,
+//   });
 
-  logger.info({
-    section: 'Guaranteed-Effects',
-    claimedContractCalls: finalizedTxData.public.partitionedTranscript[0]?.effects.claimedContractCalls,
-    claimedNullifiers: finalizedTxData.public.partitionedTranscript[0]?.effects.claimedNullifiers,
-    claimedReceives: finalizedTxData.public.partitionedTranscript[0]?.effects.claimedReceives,
-    claimedSpends: finalizedTxData.public.partitionedTranscript[0]?.effects.claimedSpends,
-    mints: finalizedTxData.public.partitionedTranscript[0]?.effects.mints,
-    gas: finalizedTxData.public.partitionedTranscript[0]?.gas,
-    program: finalizedTxData.public.partitionedTranscript[0]?.program,
-  });
+//   logger.info({
+//     section: 'Guaranteed-Effects',
+//     claimedContractCalls: finalizedTxData.public.partitionedTranscript[0]?.effects.claimedContractCalls,
+//     claimedNullifiers: finalizedTxData.public.partitionedTranscript[0]?.effects.claimedNullifiers,
+//     claimedReceives: finalizedTxData.public.partitionedTranscript[0]?.effects.claimedReceives,
+//     claimedSpends: finalizedTxData.public.partitionedTranscript[0]?.effects.claimedSpends,
+//     mints: finalizedTxData.public.partitionedTranscript[0]?.effects.mints,
+//     gas: finalizedTxData.public.partitionedTranscript[0]?.gas,
+//     program: finalizedTxData.public.partitionedTranscript[0]?.program,
+//   });
 
-  logger.info({
-    section: 'Fallible-Effects',
-    claimedContractCalls: finalizedTxData.public.partitionedTranscript[1]?.effects.claimedContractCalls,
-    claimedNullifiers: finalizedTxData.public.partitionedTranscript[1]?.effects.claimedNullifiers,
-    claimedReceives: finalizedTxData.public.partitionedTranscript[1]?.effects.claimedReceives,
-    claimedSpends: finalizedTxData.public.partitionedTranscript[1]?.effects.claimedSpends,
-    mints: finalizedTxData.public.partitionedTranscript[1]?.effects.mints,
-    gas: finalizedTxData.public.partitionedTranscript[1]?.gas,
-    program: finalizedTxData.public.partitionedTranscript[1]?.program,
-  });
+//   logger.info({
+//     section: 'Fallible-Effects',
+//     claimedContractCalls: finalizedTxData.public.partitionedTranscript[1]?.effects.claimedContractCalls,
+//     claimedNullifiers: finalizedTxData.public.partitionedTranscript[1]?.effects.claimedNullifiers,
+//     claimedReceives: finalizedTxData.public.partitionedTranscript[1]?.effects.claimedReceives,
+//     claimedSpends: finalizedTxData.public.partitionedTranscript[1]?.effects.claimedSpends,
+//     mints: finalizedTxData.public.partitionedTranscript[1]?.effects.mints,
+//     gas: finalizedTxData.public.partitionedTranscript[1]?.gas,
+//     program: finalizedTxData.public.partitionedTranscript[1]?.program,
+//   });
 
-  logger.info({
-    section: 'Private Section',
-    Inputs: finalizedTxData.private.input,
-    newCoins: finalizedTxData.private.newCoins,
-    nextPrivateState: finalizedTxData.private.nextPrivateState,
-    nextZswapLocalState: finalizedTxData.private.nextZswapLocalState,
-    Output: finalizedTxData.private.output,
-    privateTranscriptOutputs: finalizedTxData.private.privateTranscriptOutputs,
-    result: finalizedTxData.private.result,
-    unprovenTx: finalizedTxData.private.unprovenTx,
-  });
+//   logger.info({
+//     section: 'Private Section',
+//     Inputs: finalizedTxData.private.input,
+//     newCoins: finalizedTxData.private.newCoins,
+//     nextPrivateState: finalizedTxData.private.nextPrivateState,
+//     nextZswapLocalState: finalizedTxData.private.nextZswapLocalState,
+//     Output: finalizedTxData.private.output,
+//     privateTranscriptOutputs: finalizedTxData.private.privateTranscriptOutputs,
+//     result: finalizedTxData.private.result,
+//     unprovenTx: finalizedTxData.private.unprovenTx,
+//   });
 
-  return finalizedTxData.public;
-};
+//   return finalizedTxData.public;
+// };
 
-export const displayCounterValue = async (
-  providers: CounterProviders,
-  counterContract: DeployedCounterContract,
-): Promise<{ counterValue: bigint | null; contractAddress: string }> => {
-  const contractAddress = counterContract.deployTxData.public.contractAddress;
-  const counterValue = await getCounterLedgerState(providers, contractAddress);
-  if (counterValue === null) {
-    logger.info(`There is no counter contract deployed at ${contractAddress}.`);
-  } else {
-    logger.info(`Current counter value: ${Number(counterValue)}`);
-  }
-  return { contractAddress, counterValue };
-};
+// export const displayCounterValue = async (
+//   providers: IdShieldProviders,
+//   counterContract: DeployedIdShieldContract,
+// ): Promise<{ counterValue: bigint | null; contractAddress: string }> => {
+//   const contractAddress = counterContract.deployTxData.public.contractAddress;
+//   const counterValue = await getCounterLedgerState(providers, contractAddress);
+//   if (counterValue === null) {
+//     logger.info(`There is no counter contract deployed at ${contractAddress}.`);
+//   } else {
+//     logger.info(`Current counter value: ${Number(counterValue)}`);
+//   }
+//   return { contractAddress, counterValue };
+// };
 
 export const createWalletAndMidnightProvider = async (wallet: Wallet): Promise<WalletProvider & MidnightProvider> => {
   const state = await Rx.firstValueFrom(wallet.state());
@@ -362,7 +376,7 @@ export const buildFreshWallet = async (config: Config): Promise<Wallet & Resourc
 export const configureProviders = async (wallet: Wallet & Resource, config: Config) => {
   const walletAndMidnightProvider = await createWalletAndMidnightProvider(wallet);
   return {
-    privateStateProvider: levelPrivateStateProvider<typeof CounterPrivateStateId>({
+    privateStateProvider: levelPrivateStateProvider<typeof IdShieldPrivateStateId>({
       privateStateStoreName: contractConfig.privateStateStoreName,
     }),
     publicDataProvider: indexerPublicDataProvider(config.indexer, config.indexerWS),

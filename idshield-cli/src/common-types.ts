@@ -1,25 +1,29 @@
-import { Counter, type CounterPrivateState } from '@meshsdk/counter-contract';
+import { IdShield, type IdShieldPrivateState } from '@meshsdk/idshield-contract';
 import type { ImpureCircuitId, MidnightProviders } from '@midnight-ntwrk/midnight-js-types';
 import type { DeployedContract, FoundContract } from '@midnight-ntwrk/midnight-js-contracts';
 
-export type CounterCircuits = ImpureCircuitId<Counter.Contract<CounterPrivateState>>;
+export type IdShieldCircuits = ImpureCircuitId<IdShield.Contract<IdShieldPrivateState>>;
 
-export const CounterPrivateStateId = 'counterPrivateState';
+export const IdShieldPrivateStateId = 'idShieldPrivateState';
 
-export type CounterProviders = MidnightProviders<CounterCircuits, typeof CounterPrivateStateId, CounterPrivateState>;
+export type IdShieldProviders = MidnightProviders<
+  IdShieldCircuits,
+  typeof IdShieldPrivateStateId,
+  IdShieldPrivateState
+>;
 
-export type CounterContract = Counter.Contract<CounterPrivateState>;
+export type IdShieldContract = IdShield.Contract<IdShieldPrivateState>;
 
-export type DeployedCounterContract = DeployedContract<CounterContract> | FoundContract<CounterContract>;
+export type DeployedIdShieldContract = DeployedContract<IdShieldContract> | FoundContract<IdShieldContract>;
 
 export type UserAction = {
-  increment: string | undefined;  
+  increment: string | undefined;
 };
 
-export type DerivedState = {
-  readonly round: Counter.Ledger["round"];
-};
+// export type DerivedState = {
+//   readonly round: IdShield.Ledger;
+// };
 
-export const emptyState: DerivedState = {
-  round: 0n,
-};
+// export const emptyState: DerivedState = {
+//   round: 0n,
+// };

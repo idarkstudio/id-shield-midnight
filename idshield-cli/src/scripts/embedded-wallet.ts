@@ -1,17 +1,20 @@
-import { TestEnvironment } from '../test/commons';
-import path from 'path';
-import { createLogger } from '../logger-utils';
-import { currentDir } from '../config';
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 import * as api from '../api';
-
-import { mnemonicToSeedSync } from 'bip39';
-import { BIP32Factory } from 'bip32';
+import * as bip39 from '@scure/bip39';
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 
-import * as bip39 from '@scure/bip39';
-import { wordlist as english } from '@scure/bip39/wordlists/english';
+import { HDWallet, Roles, generateRandomSeed } from '@midnight-ntwrk/wallet-sdk-hd';
+
+import { BIP32Factory } from 'bip32';
 import { HDKey } from '@scure/bip32';
-import { generateRandomSeed, HDWallet, Roles } from '@midnight-ntwrk/wallet-sdk-hd';
+import { IdShieldProviders } from '../common-types';
+import { TestEnvironment } from '../test/commons';
+import { createLogger } from '../logger-utils';
+import { currentDir } from '../config';
+import { wordlist as english } from '@scure/bip39/wordlists/english';
+import { mnemonicToSeedSync } from 'bip39';
+import path from 'path';
 
 export const mnemonicToWords: (mnemonic: string) => string[] = (mnemonic: string) => mnemonic.split(' ');
 
@@ -70,9 +73,10 @@ api.setLogger(logger);
 const testEnvironment = new TestEnvironment(logger);
 const testConfiguration = await testEnvironment.start();
 const wallet = await testEnvironment.getWallet();
-const providers = await api.configureProviders(wallet, testConfiguration.dappConfig);
+const providers: IdShieldProviders = await api.configureProviders(wallet, testConfiguration.dappConfig);
 
-// const counterContract = await api.deploy(providers, { privateCounter: 0 });
+const idShieldContract = await api.deploy(providers);
+console.log(idShieldContract.deployTxData.public.contractAddress);
 // const response = await api.increment(counterContract);
 // const counterAfter = await api.displayCounterValue(providers, counterContract);
 

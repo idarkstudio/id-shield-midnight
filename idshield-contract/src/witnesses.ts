@@ -1,12 +1,8 @@
 // This is how we type an empty object.
-export type CounterPrivateState = {
-  privateCounter: number;
-};
+export type IdShieldPrivateState = {};
 
-export const createPrivateState = (value: number): CounterPrivateState => {
-  return {
-    privateCounter: value,
-  };
+export const createPrivateState = (): IdShieldPrivateState => {
+  return {};
 };
 
 export const witnesses = {};
