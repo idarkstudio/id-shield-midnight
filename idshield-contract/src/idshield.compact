@@ -62,7 +62,7 @@ export circuit registerVehicle(
   });
 }
 
-export circuit canDrive(currentTime: Uint<64>): Boolean {
+export circuit canDrive(): Boolean {
   const pk = disclose(publicKey(secretKey()));
   const record = vehicleRegistry.lookup(pk);
   assert(record.insuranceStatus == InsuranceStatus.Paid, "Insurance not paid");
