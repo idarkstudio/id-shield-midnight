@@ -2,6 +2,7 @@ import type * as __compactRuntime from '@midnight-ntwrk/compact-runtime';
 
 export type Witnesses<T> = {
   secretKey(context: __compactRuntime.WitnessContext<Ledger, T>): [T, Uint8Array];
+  getUserBloodType(context: __compactRuntime.WitnessContext<Ledger, T>): [T, number];
 }
 
 export type ImpureCircuits<T> = {
@@ -17,7 +18,8 @@ export type ImpureCircuits<T> = {
   registerClinicalHistory(context: __compactRuntime.CircuitContext<T>,
                           genre_0: number,
                           fullName_0: string,
-                          medicalCoverage_0: number): __compactRuntime.CircuitResults<T, []>;
+                          medicalCoverage_0: number,
+                          bloodType_0: number): __compactRuntime.CircuitResults<T, []>;
   addConsultation(context: __compactRuntime.CircuitContext<T>,
                   professionalId_0: string,
                   date_0: bigint,
@@ -25,8 +27,11 @@ export type ImpureCircuits<T> = {
                   specialistType_0: number): __compactRuntime.CircuitResults<T, []>;
   viewClinicalHistory(context: __compactRuntime.CircuitContext<T>): __compactRuntime.CircuitResults<T, { genre: number,
                                                                                                          fullName: string,
-                                                                                                         medicalCoverage: number
+                                                                                                         medicalCoverage: number,
+                                                                                                         bloodType: number
                                                                                                        }>;
+  canDonate(context: __compactRuntime.CircuitContext<T>, target_0: number): __compactRuntime.CircuitResults<T, boolean>;
+  canReceive(context: __compactRuntime.CircuitContext<T>, from_0: number): __compactRuntime.CircuitResults<T, boolean>;
 }
 
 export type PureCircuits = {
@@ -45,7 +50,8 @@ export type Circuits<T> = {
   registerClinicalHistory(context: __compactRuntime.CircuitContext<T>,
                           genre_0: number,
                           fullName_0: string,
-                          medicalCoverage_0: number): __compactRuntime.CircuitResults<T, []>;
+                          medicalCoverage_0: number,
+                          bloodType_0: number): __compactRuntime.CircuitResults<T, []>;
   addConsultation(context: __compactRuntime.CircuitContext<T>,
                   professionalId_0: string,
                   date_0: bigint,
@@ -53,8 +59,11 @@ export type Circuits<T> = {
                   specialistType_0: number): __compactRuntime.CircuitResults<T, []>;
   viewClinicalHistory(context: __compactRuntime.CircuitContext<T>): __compactRuntime.CircuitResults<T, { genre: number,
                                                                                                          fullName: string,
-                                                                                                         medicalCoverage: number
+                                                                                                         medicalCoverage: number,
+                                                                                                         bloodType: number
                                                                                                        }>;
+  canDonate(context: __compactRuntime.CircuitContext<T>, target_0: number): __compactRuntime.CircuitResults<T, boolean>;
+  canReceive(context: __compactRuntime.CircuitContext<T>, from_0: number): __compactRuntime.CircuitResults<T, boolean>;
 }
 
 export type Ledger = {
@@ -74,9 +83,10 @@ export type Ledger = {
     member(key_0: Uint8Array): boolean;
     lookup(key_0: Uint8Array): { genre: number,
                                  fullName: string,
-                                 medicalCoverage: number
+                                 medicalCoverage: number,
+                                 bloodType: number
                                };
-    [Symbol.iterator](): Iterator<[Uint8Array, { genre: number, fullName: string, medicalCoverage: number }]>
+    [Symbol.iterator](): Iterator<[Uint8Array, { genre: number, fullName: string, medicalCoverage: number, bloodType: number }]>
   };
   consultations: {
     isEmpty(): boolean;

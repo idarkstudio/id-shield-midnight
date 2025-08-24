@@ -133,6 +133,23 @@
               "None"
             ]
           }
+        },
+        {
+          "name": "bloodType",
+          "type": {
+            "type-name": "Enum",
+            "name": "BloodType",
+            "elements": [
+              "A_Pos",
+              "A_Neg",
+              "B_Pos",
+              "B_Neg",
+              "AB_Pos",
+              "AB_Neg",
+              "O_Pos",
+              "O_Neg"
+            ]
+          }
         }
       ],
       "result-type": {
@@ -225,8 +242,77 @@
                 "None"
               ]
             }
+          },
+          {
+            "name": "bloodType",
+            "type": {
+              "type-name": "Enum",
+              "name": "BloodType",
+              "elements": [
+                "A_Pos",
+                "A_Neg",
+                "B_Pos",
+                "B_Neg",
+                "AB_Pos",
+                "AB_Neg",
+                "O_Pos",
+                "O_Neg"
+              ]
+            }
           }
         ]
+      }
+    },
+    {
+      "name": "canDonate",
+      "pure": false,
+      "arguments": [
+        {
+          "name": "target",
+          "type": {
+            "type-name": "Enum",
+            "name": "BloodType",
+            "elements": [
+              "A_Pos",
+              "A_Neg",
+              "B_Pos",
+              "B_Neg",
+              "AB_Pos",
+              "AB_Neg",
+              "O_Pos",
+              "O_Neg"
+            ]
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Boolean"
+      }
+    },
+    {
+      "name": "canReceive",
+      "pure": false,
+      "arguments": [
+        {
+          "name": "from",
+          "type": {
+            "type-name": "Enum",
+            "name": "BloodType",
+            "elements": [
+              "A_Pos",
+              "A_Neg",
+              "B_Pos",
+              "B_Neg",
+              "AB_Pos",
+              "AB_Neg",
+              "O_Pos",
+              "O_Neg"
+            ]
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Boolean"
       }
     }
   ],
@@ -238,6 +324,25 @@
       "result type": {
         "type-name": "Bytes",
         "length": 32
+      }
+    },
+    {
+      "name": "getUserBloodType",
+      "arguments": [
+      ],
+      "result type": {
+        "type-name": "Enum",
+        "name": "BloodType",
+        "elements": [
+          "A_Pos",
+          "A_Neg",
+          "B_Pos",
+          "B_Neg",
+          "AB_Pos",
+          "AB_Neg",
+          "O_Pos",
+          "O_Neg"
+        ]
       }
     }
   ],

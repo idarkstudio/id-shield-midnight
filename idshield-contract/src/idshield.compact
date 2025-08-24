@@ -17,6 +17,7 @@ struct VehicleRecord {
 enum Genre { Male, Female, Other }
 enum MedicalCoverage { SocialSecurity, Private, None }
 enum SpecialistType { General, Cardiologist, Dermatologist, Other }
+enum BloodType { A_Pos, A_Neg, B_Pos, B_Neg, AB_Pos, AB_Neg, O_Pos, O_Neg }
 
 export ledger clinicalRegistry: Map<Bytes<32>, ClinicalRecord>;
 export ledger consultations: Map<Bytes<32>, List<Consultation>>;
@@ -24,7 +25,8 @@ export ledger consultations: Map<Bytes<32>, List<Consultation>>;
 struct ClinicalRecord {
   genre: Genre,
   fullName: Opaque<'string'>,
-  medicalCoverage: MedicalCoverage
+  medicalCoverage: MedicalCoverage,
+  bloodType: BloodType,
 }
 
 struct Consultation {
@@ -37,6 +39,8 @@ struct Consultation {
 // --- Shared Witness and Public Key Helper ---
 
 witness secretKey(): Bytes<32>;
+
+witness getUserBloodType(): BloodType;
 
 // You may use a single domain or separate domains for each registry if desired
 circuit publicKey(sk: Bytes<32>): Bytes<32> {
@@ -77,13 +81,15 @@ export circuit viewVehicle(): VehicleRecord {
 export circuit registerClinicalHistory(
   genre: Genre,
   fullName: Opaque<'string'>,
-  medicalCoverage: MedicalCoverage
+  medicalCoverage: MedicalCoverage,
+  bloodType: BloodType
 ): [] {
   const pk = disclose(publicKey(secretKey()));
   clinicalRegistry.insert(pk, ClinicalRecord{
     genre: disclose(genre),
     fullName: disclose(fullName),
-    medicalCoverage: disclose(medicalCoverage)
+    medicalCoverage: disclose(medicalCoverage),
+    bloodType: disclose(bloodType)
   });
 }
 
@@ -106,4 +112,79 @@ export circuit addConsultation(
 export circuit viewClinicalHistory(): ClinicalRecord {
   const pk = disclose(publicKey(secretKey()));
   return clinicalRegistry.lookup(pk);
+}
+
+export circuit canDonate(target: BloodType): Boolean {
+  const userType = disclose(getUserBloodType());
+  return isCompatibleDonor(userType, target);
+}
+
+export circuit canReceive(from: BloodType): Boolean {
+  const userType = disclose(getUserBloodType());
+  return isCompatibleDonor(from, userType);
+}
+
+circuit isCompatibleDonor(donor: BloodType, recipient: BloodType): Boolean {
+ if (donor == BloodType.O_Neg) {
+    return true;
+  } else if (donor == BloodType.O_Pos) {
+    if (
+      recipient == BloodType.O_Pos ||
+      recipient == BloodType.A_Pos ||
+      recipient == BloodType.B_Pos ||
+      recipient == BloodType.AB_Pos
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  } else if (donor == BloodType.A_Neg) {
+    if (
+      recipient == BloodType.A_Neg ||
+      recipient == BloodType.A_Pos ||
+      recipient == BloodType.AB_Neg ||
+      recipient == BloodType.AB_Pos
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  } else if (donor == BloodType.A_Pos) {
+    if (recipient == BloodType.A_Pos || recipient == BloodType.AB_Pos) {
+      return true;
+    } else {
+      return false;
+    }
+  } else if (donor == BloodType.B_Neg) {
+    if (
+      recipient == BloodType.B_Neg ||
+      recipient == BloodType.B_Pos ||
+      recipient == BloodType.AB_Neg ||
+      recipient == BloodType.AB_Pos
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  } else if (donor == BloodType.B_Pos) {
+    if (recipient == BloodType.B_Pos || recipient == BloodType.AB_Pos) {
+      return true;
+    } else {
+      return false;
+    }
+  } else if (donor == BloodType.AB_Neg) {
+    if (recipient == BloodType.AB_Neg || recipient == BloodType.AB_Pos) {
+      return true;
+    } else {
+      return false;
+    }
+  } else if (donor == BloodType.AB_Pos) {
+    if (recipient == BloodType.AB_Pos) {
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
 }
