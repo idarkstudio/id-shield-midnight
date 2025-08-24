@@ -201,11 +201,10 @@ class Contract {
         return { result: result_0, context: context, proofData: partialProofData };
       },
       canDrive: (...args_1) => {
-        if (args_1.length !== 2) {
-          throw new __compactRuntime.CompactError(`canDrive: expected 2 arguments (as invoked from Typescript), received ${args_1.length}`);
+        if (args_1.length !== 1) {
+          throw new __compactRuntime.CompactError(`canDrive: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
         }
         const contextOrig_0 = args_1[0];
-        const currentTime_0 = args_1[1];
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.originalState != undefined && contextOrig_0.transactionContext != undefined)) {
           __compactRuntime.type_error('canDrive',
                                       'argument 1 (as invoked from Typescript)',
@@ -213,26 +212,14 @@ class Contract {
                                       'CircuitContext',
                                       contextOrig_0)
         }
-        if (!(typeof(currentTime_0) === 'bigint' && currentTime_0 >= 0n && currentTime_0 <= 18446744073709551615n)) {
-          __compactRuntime.type_error('canDrive',
-                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                      'idshield.compact line 65 char 1',
-                                      'Uint<0..18446744073709551615>',
-                                      currentTime_0)
-        }
         const context = { ...contextOrig_0 };
         const partialProofData = {
-          input: {
-            value: _descriptor_4.toValue(currentTime_0),
-            alignment: _descriptor_4.alignment()
-          },
+          input: { value: [], alignment: [] },
           output: undefined,
           publicTranscript: [],
           privateTranscriptOutputs: []
         };
-        const result_0 = this._canDrive_0(context,
-                                          partialProofData,
-                                          currentTime_0);
+        const result_0 = this._canDrive_0(context, partialProofData);
         partialProofData.output = { value: _descriptor_1.toValue(result_0), alignment: _descriptor_1.alignment() };
         return { result: result_0, context: context, proofData: partialProofData };
       },
@@ -617,7 +604,7 @@ class Contract {
                      { ins: { cached: true, n: 1 } }]);
     return [];
   }
-  _canDrive_0(context, partialProofData, currentTime_0) {
+  _canDrive_0(context, partialProofData) {
     const pk_0 = this._publicKey_0(this._secretKey_0(context, partialProofData));
     const record_0 = _descriptor_12.fromValue(Contract._query(context,
                                                               partialProofData,

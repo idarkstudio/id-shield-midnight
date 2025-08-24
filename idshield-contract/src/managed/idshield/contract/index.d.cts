@@ -10,7 +10,7 @@ export type ImpureCircuits<T> = {
                   status_0: number,
                   insType_0: number,
                   paidDate_0: bigint): __compactRuntime.CircuitResults<T, []>;
-  canDrive(context: __compactRuntime.CircuitContext<T>, currentTime_0: bigint): __compactRuntime.CircuitResults<T, boolean>;
+  canDrive(context: __compactRuntime.CircuitContext<T>): __compactRuntime.CircuitResults<T, boolean>;
   viewVehicle(context: __compactRuntime.CircuitContext<T>): __compactRuntime.CircuitResults<T, { insuranceStatus: number,
                                                                                                  insuranceType: number,
                                                                                                  insurancePaidDate: bigint
@@ -42,7 +42,7 @@ export type Circuits<T> = {
                   status_0: number,
                   insType_0: number,
                   paidDate_0: bigint): __compactRuntime.CircuitResults<T, []>;
-  canDrive(context: __compactRuntime.CircuitContext<T>, currentTime_0: bigint): __compactRuntime.CircuitResults<T, boolean>;
+  canDrive(context: __compactRuntime.CircuitContext<T>): __compactRuntime.CircuitResults<T, boolean>;
   viewVehicle(context: __compactRuntime.CircuitContext<T>): __compactRuntime.CircuitResults<T, { insuranceStatus: number,
                                                                                                  insuranceType: number,
                                                                                                  insurancePaidDate: bigint
