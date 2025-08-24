@@ -1,0 +1,246 @@
+{
+  "circuits": [
+    {
+      "name": "registerVehicle",
+      "pure": false,
+      "arguments": [
+        {
+          "name": "status",
+          "type": {
+            "type-name": "Enum",
+            "name": "InsuranceStatus",
+            "elements": [
+              "Unpaid",
+              "Paid"
+            ]
+          }
+        },
+        {
+          "name": "insType",
+          "type": {
+            "type-name": "Enum",
+            "name": "InsuranceType",
+            "elements": [
+              "FullCoverage",
+              "ThirdParty",
+              "CivilLiability"
+            ]
+          }
+        },
+        {
+          "name": "paidDate",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "canDrive",
+      "pure": false,
+      "arguments": [
+        {
+          "name": "currentTime",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Boolean"
+      }
+    },
+    {
+      "name": "viewVehicle",
+      "pure": false,
+      "arguments": [
+      ],
+      "result-type": {
+        "type-name": "Struct",
+        "name": "VehicleRecord",
+        "elements": [
+          {
+            "name": "insuranceStatus",
+            "type": {
+              "type-name": "Enum",
+              "name": "InsuranceStatus",
+              "elements": [
+                "Unpaid",
+                "Paid"
+              ]
+            }
+          },
+          {
+            "name": "insuranceType",
+            "type": {
+              "type-name": "Enum",
+              "name": "InsuranceType",
+              "elements": [
+                "FullCoverage",
+                "ThirdParty",
+                "CivilLiability"
+              ]
+            }
+          },
+          {
+            "name": "insurancePaidDate",
+            "type": {
+              "type-name": "Uint",
+              "maxval": 18446744073709551615
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "registerClinicalHistory",
+      "pure": false,
+      "arguments": [
+        {
+          "name": "genre",
+          "type": {
+            "type-name": "Enum",
+            "name": "Genre",
+            "elements": [
+              "Male",
+              "Female",
+              "Other"
+            ]
+          }
+        },
+        {
+          "name": "fullName",
+          "type": {
+            "type-name": "Opaque",
+            "tsType": "string"
+          }
+        },
+        {
+          "name": "medicalCoverage",
+          "type": {
+            "type-name": "Enum",
+            "name": "MedicalCoverage",
+            "elements": [
+              "SocialSecurity",
+              "Private",
+              "None"
+            ]
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "addConsultation",
+      "pure": false,
+      "arguments": [
+        {
+          "name": "professionalId",
+          "type": {
+            "type-name": "Opaque",
+            "tsType": "string"
+          }
+        },
+        {
+          "name": "date",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        },
+        {
+          "name": "result",
+          "type": {
+            "type-name": "Opaque",
+            "tsType": "string"
+          }
+        },
+        {
+          "name": "specialistType",
+          "type": {
+            "type-name": "Enum",
+            "name": "SpecialistType",
+            "elements": [
+              "General",
+              "Cardiologist",
+              "Dermatologist",
+              "Other"
+            ]
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "viewClinicalHistory",
+      "pure": false,
+      "arguments": [
+      ],
+      "result-type": {
+        "type-name": "Struct",
+        "name": "ClinicalRecord",
+        "elements": [
+          {
+            "name": "genre",
+            "type": {
+              "type-name": "Enum",
+              "name": "Genre",
+              "elements": [
+                "Male",
+                "Female",
+                "Other"
+              ]
+            }
+          },
+          {
+            "name": "fullName",
+            "type": {
+              "type-name": "Opaque",
+              "tsType": "string"
+            }
+          },
+          {
+            "name": "medicalCoverage",
+            "type": {
+              "type-name": "Enum",
+              "name": "MedicalCoverage",
+              "elements": [
+                "SocialSecurity",
+                "Private",
+                "None"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "witnesses": [
+    {
+      "name": "secretKey",
+      "arguments": [
+      ],
+      "result type": {
+        "type-name": "Bytes",
+        "length": 32
+      }
+    }
+  ],
+  "contracts": [
+  ]
+}

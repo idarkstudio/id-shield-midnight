@@ -1,0 +1,109 @@
+import CompactStandardLibrary;
+
+// --- Vehicle Section ---
+
+enum InsuranceStatus { Unpaid, Paid }
+enum InsuranceType { FullCoverage, ThirdParty, CivilLiability }
+
+export ledger vehicleRegistry: Map<Bytes<32>, VehicleRecord>;
+
+struct VehicleRecord {
+  insuranceStatus: InsuranceStatus,
+  insuranceType: InsuranceType,
+  insurancePaidDate: Uint<64> // Unix timestamp of payment date
+}
+
+// --- Clinical Section ---
+enum Genre { Male, Female, Other }
+enum MedicalCoverage { SocialSecurity, Private, None }
+enum SpecialistType { General, Cardiologist, Dermatologist, Other }
+
+export ledger clinicalRegistry: Map<Bytes<32>, ClinicalRecord>;
+export ledger consultations: Map<Bytes<32>, List<Consultation>>;
+
+struct ClinicalRecord {
+  genre: Genre,
+  fullName: Opaque<'string'>,
+  medicalCoverage: MedicalCoverage
+}
+
+struct Consultation {
+  professionalId: Opaque<'string'>,   // Full name of the professional, kept opaque for privacy
+  date: Uint<64>,
+  result: Opaque<'string'>,
+  specialistType: SpecialistType
+}
+
+// --- Shared Witness and Public Key Helper ---
+
+witness secretKey(): Bytes<32>;
+
+// You may use a single domain or separate domains for each registry if desired
+circuit publicKey(sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "person-domain"), sk]);
+}
+
+// --- Vehicle Functions ---
+
+export circuit registerVehicle(
+  status: InsuranceStatus,
+  insType: InsuranceType,
+  paidDate: Uint<64>
+): [] {
+  const pk = disclose(publicKey(secretKey()));
+  vehicleRegistry.insert(pk, VehicleRecord{
+    insuranceStatus: disclose(status),
+    insuranceType: disclose(insType),
+    insurancePaidDate: disclose(paidDate)
+  });
+}
+
+export circuit canDrive(currentTime: Uint<64>): Boolean {
+  const pk = disclose(publicKey(secretKey()));
+  const record = vehicleRegistry.lookup(pk);
+  assert(record.insuranceStatus == InsuranceStatus.Paid, "Insurance not paid");
+  // Optionally, check payment date validity here
+  return disclose(true);
+}
+
+// View vehicle data (only for the owner)
+export circuit viewVehicle(): VehicleRecord {
+  const pk = disclose(publicKey(secretKey()));
+  return vehicleRegistry.lookup(pk);
+}
+
+// --- Clinical Functions ---
+
+export circuit registerClinicalHistory(
+  genre: Genre,
+  fullName: Opaque<'string'>,
+  medicalCoverage: MedicalCoverage
+): [] {
+  const pk = disclose(publicKey(secretKey()));
+  clinicalRegistry.insert(pk, ClinicalRecord{
+    genre: disclose(genre),
+    fullName: disclose(fullName),
+    medicalCoverage: disclose(medicalCoverage)
+  });
+}
+
+export circuit addConsultation(
+  professionalId: Opaque<'string'>,
+  date: Uint<64>,
+  result: Opaque<'string'>,
+  specialistType: SpecialistType
+): [] {
+  const pk = disclose(publicKey(secretKey()));
+  consultations.lookup(pk).pushFront(Consultation{
+    professionalId: disclose(professionalId),
+    date: disclose(date),
+    result: disclose(result),
+    specialistType: disclose(specialistType)
+  });
+}
+
+// View clinical history (only for the owner)
+export circuit viewClinicalHistory(): ClinicalRecord {
+  const pk = disclose(publicKey(secretKey()));
+  return clinicalRegistry.lookup(pk);
+}
